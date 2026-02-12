@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import * as bootstrap from "bootstrap";
-import "../assets/style.css";
-import ProductModal from "../components/ProductModal";
-import Pagination from "../components/Pagination";
+import ProductModal from "../../components/ProductModal";
+import Pagination from "../../components/Pagination";
 import { useNavigate } from "react-router";
 import { TailSpin } from "react-loader-spinner";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slice/messageSlice";
+import useMessage from "../../hooks/useMessage";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -26,7 +28,7 @@ const INITIAL_TEMPLATE_DATA = {
   //, 新增API 沒有的屬性
 };
 
-function DashboardProducts() {
+function AdminProducts() {
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(false);
   // const [isAuth, setIsAuth] = useState(() => {
@@ -45,6 +47,9 @@ function DashboardProducts() {
   const [modalType, setModalType] = useState();
   const [pagination, setPagination] = useState({});
   const productModalRef = useRef(null);
+  const dispatch = useDispatch();
+  const { showError, showSuccess } = useMessage();
+
   const getProducts = async (page = 1) => {
     try {
       const res = await axios.get(
@@ -53,35 +58,39 @@ function DashboardProducts() {
       setProducts(Object.values(res.data.products));
       // console.log(Object.values(res.data.products));
       setPagination(res.data.pagination);
+      showSuccess("取得成功");
     } catch (e) {
       console.error(e);
+      dispatch(createAsyncMessage(e.response.data));
     }
   };
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("hexToken="))
-      ?.split("=")[1];
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    axios.defaults.headers.common["Authorization"] = token;
-    const checkLogin = async () => {
-      try {
-        const res = await axios.post(`${API_BASE}/api/user/check`);
-        console.log("token 驗證結果:", res.data);
-        setIsAuth(true);
-        getProducts();
-      } catch (error) {
-        console.error("token 驗證失敗", error.response);
-      }
-    };
-    checkLogin();
+    // const token = document.cookie
+    //   .split("; ")
+    //   .find((row) => row.startsWith("hexToken="))
+    //   ?.split("=")[1];
+    // if (!token) {
+    //   navigate("/login");
+    //   return;
+    // }
+    // axios.defaults.headers.common["Authorization"] = token;
+    // const checkLogin = async () => {
+    //   try {
+    //     const res = await axios.post(`${API_BASE}/api/user/check`);
+    //     console.log("token 驗證結果:", res.data);
+    //     setIsAuth(true);
+    //     getProducts();
+    //   } catch (error) {
+    //     console.error("token 驗證失敗", error.response);
+    //     showError(error.response.data.message);
+    //   }
+    // };
+    // checkLogin();
     productModalRef.current = new bootstrap.Modal("#productModal", {
       keyboard: false,
     });
-  }, [navigate]);
+    //關閉時移除焦點?!!?!
+  }, []);
 
   const openModal = (type, product) => {
     // console.log(product);
@@ -197,4 +206,4 @@ function DashboardProducts() {
   );
 }
 
-export default DashboardProducts;
+export default AdminProducts;

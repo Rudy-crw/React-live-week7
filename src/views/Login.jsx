@@ -62,7 +62,7 @@ function Login() {
         title: "登入成功",
       });
 
-      navigate("/dashboardproducts");
+      navigate("/admin/products");
     } catch (e) {
       Toast.fire({
         icon: "error",

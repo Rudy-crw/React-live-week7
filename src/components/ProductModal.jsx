@@ -5,6 +5,8 @@ import { useEffect } from "react";
 // SweetAlert
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { useDispatch } from "react-redux";
+import { createAsyncMessage, createMessage } from "../slice/messageSlice";
 // SweetAlert
 const MySwal = withReactContent(Swal);
 // 2. 自定義一個 Toast (右上角小提示)
@@ -26,6 +28,8 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 
 function ProductModal({ modalType, templateProduct, closeModal, getProducts }) {
   const [tempData, setTempData] = useState(templateProduct);
+  const dispatch = useDispatch();
+
   useEffect(() => {
     setTempData(templateProduct);
   }, [templateProduct]);
@@ -109,7 +113,7 @@ function ProductModal({ modalType, templateProduct, closeModal, getProducts }) {
         icon: "success",
         title: `商品${method === "post" ? "新增" : "更新"}成功！`,
       });
-
+      dispatch(createAsyncMessage(res.data));
       getProducts();
       closeModal();
     } catch (error) {
@@ -148,7 +152,6 @@ function ProductModal({ modalType, templateProduct, closeModal, getProducts }) {
     const file = e.target.files?.[0];
 
     if (!file) {
-      // 修改：原本是 alert，現在改用 Toast 顯示警告
       Toast.fire({
         icon: "warning",
         title: "請選擇要上傳的檔案",
@@ -442,7 +445,9 @@ function ProductModal({ modalType, templateProduct, closeModal, getProducts }) {
                       value={tempData.style}
                       onChange={(e) => handleModalInputChange(e)}
                     >
-                      <option value="">請選擇車型風格</option>
+                      <option value="" disabled>
+                        請選擇車型風格
+                      </option>
                       <option value="仿賽">仿賽</option>
                       <option value="街車">街車</option>
                       <option value="速克達">速克達</option>
