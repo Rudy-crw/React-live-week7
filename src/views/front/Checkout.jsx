@@ -6,29 +6,32 @@ import { RotatingLines } from "react-loader-spinner";
 import * as bootstrap from "bootstrap";
 import SingleProductModal from "../../components/SingleProductModal";
 
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slice/messageSlice";
+import useMessage from "../../hooks/useMessage";
+
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
-
-// SweetAlert
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 import { emailValidation } from "../../utils/validation";
 
 // SweetAlert
-const MySwal = withReactContent(Swal);
+// import Swal from "sweetalert2";
+// import withReactContent from "sweetalert2-react-content";
+// SweetAlert
+// const MySwal = withReactContent(Swal);
 // 2. 自定義一個 Toast (右上角小提示)
 // 這樣之後呼叫只要寫 Toast.fire(...) 即可，不用重複寫設定
-const Toast = MySwal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 1500,
-  timerProgressBar: true,
-  // didOpen: (toast) => {
-  //   toast.onmouseenter = Swal.stopTimer;
-  //   toast.onmouseleave = Swal.resumeTimer;
-  // },
-});
+// const Toast = MySwal.mixin({
+//   toast: true,
+//   position: "top-end",
+//   showConfirmButton: false,
+//   timer: 1500,
+//   timerProgressBar: true,
+// didOpen: (toast) => {
+//   toast.onmouseenter = Swal.stopTimer;
+//   toast.onmouseleave = Swal.resumeTimer;
+// },
+// });
 
 const Checkout = () => {
   const [products, setProducts] = useState([]);
@@ -37,8 +40,10 @@ const Checkout = () => {
   //可改為老師上課時使用的 list 的方式
   const [loadingCardId, setLoadingCardId] = useState(null);
   const [loadingProductId, setLoadingProductId] = useState(null);
-
   const productModalRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const { showError, showSuccess } = useMessage();
 
   const {
     register,
@@ -54,7 +59,7 @@ const Checkout = () => {
       setCart(res.data.data);
       // console.log("res.data.data:", res.data);
     } catch (error) {
-      console.log(error.response);
+      console.log(error.response.data.message);
     }
   };
   useEffect(() => {
@@ -64,7 +69,7 @@ const Checkout = () => {
         setProducts(res.data.products);
         console.log(res.data.products);
       } catch (error) {
-        console.log(error.response);
+        console.log(error.response.data.message);
       }
     };
     getProducts();
@@ -93,8 +98,9 @@ const Checkout = () => {
         `${API_BASE}/api/${API_PATH}/cart/${cartId}`,
         { data },
       );
-      Toast.fire({ icon: "success", title: "數量已更新" });
+      // Toast.fire({ icon: "success", title: "數量已更新" });
       // console.log(res);
+      showSuccess("數量已更新！");
       getCart();
       // const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       // setCart(res2.data.data);
@@ -103,7 +109,8 @@ const Checkout = () => {
       //   title: "商品數量已成功更新",
       // });
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      showError(error.response.data.message);
     }
   };
   const addCart = async (id, qty) => {
@@ -117,15 +124,17 @@ const Checkout = () => {
         data,
       });
       // console.log(res.data);
-      Toast.fire({
-        icon: "success",
-        title: "商品已加入購物車",
-      });
+      showSuccess("商品已加入購物車");
+      // Toast.fire({
+      //   icon: "success",
+      //   title: "商品已加入購物車",
+      // });
       // const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       // setCart(res2.data.data);
       getCart();
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      showError(error.response.data.message);
     } finally {
       setLoadingCardId(null);
     }
@@ -140,26 +149,30 @@ const Checkout = () => {
       // console.log(res);
       // const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       // setCart(res2.data.data);
-      Toast.fire({
-        icon: "success",
-        title: "商品刪除成功！",
-      });
+      // Toast.fire({
+      //   icon: "success",
+      //   title: "商品刪除成功！",
+      // });
+      showSuccess("商品刪除成功！");
       getCart();
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      showError(error.response.data.message);
     }
   };
 
   const delAllCart = async () => {
     try {
       // eslint-disable-next-line no-unused-vars
-      const res = await axios.delete(`${API_BASE}/api/${API_PATH}/carts`);
+      const res = await axios.delete(`${API_BASE}/api/${API_PATH}/cart1`);
       // console.log(res);
       // const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       // setCart(res2.data.data);
       getCart();
+      showSuccess("已清空購物車！");
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response.data.message);
+      showError(error.response.data.message);
     }
   };
 
@@ -179,19 +192,21 @@ const Checkout = () => {
       // const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       // setCart(res2.data.data);
       getCart();
-      MySwal.fire({
-        icon: "success",
-        title: "訂單建立成功",
-        html: `您的訂單編號為：<br><b>${res.data.orderId}</b>`,
-        confirmButtonText: "確定",
-      });
+      showSuccess(`訂單建立成功，您的訂單標號為： ${res.data.orderId}`); // MySwal.fire({
+      //   icon: "success",
+      //   title: "訂單建立成功",
+      //   html: `您的訂單編號為：<br><b>${res.data.orderId}</b>`,
+      //   confirmButtonText: "確定",
+      // });
     } catch (error) {
-      console.log(error.response);
-      Toast.fire({
-        icon: "error",
-        title: "訂單建立失敗",
-        text: error.response?.data?.message || "發生未知錯誤",
-      });
+      // console.log(error.response);
+      showError(error.response.data.message);
+
+      // Toast.fire({
+      //   icon: "error",
+      //   title: "訂單建立失敗",
+      //   text: error.response?.data?.message || "發生未知錯誤",
+      // });
     }
   };
   const handleView = async (id) => {
@@ -200,7 +215,7 @@ const Checkout = () => {
       const res = await axios.get(`${API_BASE}/api/${API_PATH}/product/${id}`);
       setProduct(res.data.product);
     } catch (error) {
-      console.log(error.response);
+      console.log(error.response.data.message);
     } finally {
       setLoadingProductId(null);
     }
@@ -422,6 +437,7 @@ const Checkout = () => {
                 required: "請輸入電話",
                 pattern: {
                   value: /^\d+$/,
+                  message: "電話格式不正確",
                 },
                 minLength: {
                   value: 8,

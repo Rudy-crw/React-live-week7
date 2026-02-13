@@ -3,8 +3,8 @@ import axios from "axios";
 import * as bootstrap from "bootstrap";
 import ProductModal from "../../components/ProductModal";
 import Pagination from "../../components/Pagination";
-import { useNavigate } from "react-router";
-import { TailSpin } from "react-loader-spinner";
+// import { useNavigate } from "react-router";
+// import { TailSpin } from "react-loader-spinner";
 import { useDispatch } from "react-redux";
 import { createAsyncMessage } from "../../slice/messageSlice";
 import useMessage from "../../hooks/useMessage";
@@ -29,8 +29,8 @@ const INITIAL_TEMPLATE_DATA = {
 };
 
 function AdminProducts() {
-  const navigate = useNavigate();
-  const [isAuth, setIsAuth] = useState(false);
+  // const navigate = useNavigate();
+  // const [isAuth, setIsAuth] = useState(false);
   // const [isAuth, setIsAuth] = useState(() => {
   //   const token = document.cookie
   //     .split("; ")
@@ -60,8 +60,8 @@ function AdminProducts() {
       setPagination(res.data.pagination);
       showSuccess("取得成功");
     } catch (e) {
-      console.error(e);
-      dispatch(createAsyncMessage(e.response.data));
+      // console.error(e);
+      dispatch(createAsyncMessage(e.response.data.message));
     }
   };
   useEffect(() => {
@@ -89,6 +89,7 @@ function AdminProducts() {
     productModalRef.current = new bootstrap.Modal("#productModal", {
       keyboard: false,
     });
+    getProducts();
     //關閉時移除焦點?!!?!
   }, []);
 
@@ -104,98 +105,76 @@ function AdminProducts() {
 
   return (
     <>
-      {isAuth ? (
-        <div className="container">
-          <h2>產品列表</h2>
-          <div className="text-end mt-4">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => openModal("create", INITIAL_TEMPLATE_DATA)}
-            >
-              建立新的產品
-            </button>
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>品牌</th>
-                <th>車型風格</th>
-                <th>產品名稱</th>
-                <th>原價</th>
-                <th>售價</th>
-                <th>是否啟用</th>
-                <th>編輯</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products && products.length > 0 ? (
-                products.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.category}</td>
-                    <td>{item.style}</td>
-                    <th scope="row">{item.title}</th>
-                    <td>{item.origin_price}</td>
-                    <td>{item.price}</td>
-                    <td className={`${item.is_enabled && "text-success"}`}>
-                      {item.is_enabled ? "啟用" : "未啟用"}
-                    </td>
-                    <td>
-                      <div
-                        className="btn-group"
-                        role="group"
-                        aria-label="Basic product"
+      <div className="container">
+        <h2>產品列表</h2>
+        <div className="text-end mt-4">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => openModal("create", INITIAL_TEMPLATE_DATA)}
+          >
+            建立新的產品
+          </button>
+        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>品牌</th>
+              <th>車型風格</th>
+              <th>產品名稱</th>
+              <th>原價</th>
+              <th>售價</th>
+              <th>是否啟用</th>
+              <th>編輯</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products && products.length > 0 ? (
+              products.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.category}</td>
+                  <td>{item.style}</td>
+                  <th scope="row">{item.title}</th>
+                  <td>{item.origin_price}</td>
+                  <td>{item.price}</td>
+                  <td className={`${item.is_enabled && "text-success"}`}>
+                    {item.is_enabled ? "啟用" : "未啟用"}
+                  </td>
+                  <td>
+                    <div
+                      className="btn-group"
+                      role="group"
+                      aria-label="Basic product"
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => openModal("edit", item)}
                       >
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => openModal("edit", item)}
-                        >
-                          編輯
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => openModal("delete", item)}
-                        >
-                          刪除
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="text-center">
-                    尚無產品資料
+                        編輯
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => openModal("delete", item)}
+                      >
+                        刪除
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-          <Pagination pagination={pagination} onChangePage={getProducts} />
-        </div>
-      ) : (
-        <div
-          className="d-flex flex-column justify-content-center align-items-center"
-          style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}
-        >
-          {/* 使用 TailSpin */}
-          <TailSpin
-            height="80"
-            width="80"
-            color="#0d6efd" // Bootstrap Primary Blue
-            ariaLabel="tail-spin-loading"
-            radius="1"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={true}
-          />
-
-          <p className="mt-3 text-secondary fw-bold">系統驗證中，請稍候...</p>
-        </div>
-      )}
-
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  尚無產品資料
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        <Pagination pagination={pagination} onChangePage={getProducts} />
+      </div>
       <ProductModal
         modalType={modalType}
         templateProduct={templateProduct}

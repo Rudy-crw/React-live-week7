@@ -1,20 +1,22 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { currency } from "../../utils/filter";
+import useMessage from "../../hooks/useMessage";
+
 // SweetAlert
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+// import Swal from "sweetalert2";
+// import withReactContent from "sweetalert2-react-content";
 // SweetAlert
-const MySwal = withReactContent(Swal);
+// const MySwal = withReactContent(Swal);
 // 2. 自定義一個 Toast (右上角小提示)
 // 這樣之後呼叫只要寫 Toast.fire(...) 即可，不用重複寫設定
-const Toast = MySwal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 1500,
-  timerProgressBar: true,
-});
+// const Toast = MySwal.mixin({
+//   toast: true,
+//   position: "top-end",
+//   showConfirmButton: false,
+//   timer: 1500,
+//   timerProgressBar: true,
+// });
 
 // 下面為方法一 使用 navigate 傳遞 state
 // import { useLocation } from "react-router";
@@ -32,6 +34,8 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const SingleProduct = () => {
+  const { showError, showSuccess } = useMessage();
+
   // 下面為方法一 使用 navigate 傳遞 state
   // const location = useLocation();
   // const product = location.state?.productData;
@@ -63,13 +67,15 @@ const SingleProduct = () => {
       const res = await axios.post(`${API_BASE}/api/${API_PATH}/cart`, {
         data,
       });
-      console.log(res.data);
-      Toast.fire({
-        icon: "success",
-        title: "商品已加入購物車",
-      });
+      // console.log(res.data);
+      // Toast.fire({
+      //   icon: "success",
+      //   title: "商品已加入購物車",
+      // });
+      showSuccess("商品已加入購物車");
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      showError(error.response.message);
     }
   };
   return !product ? (

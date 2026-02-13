@@ -4,26 +4,29 @@ import { currency } from "../../utils/filter";
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
+import { useDispatch } from "react-redux";
+import { createAsyncMessage } from "../../slice/messageSlice";
+import useMessage from "../../hooks/useMessage";
+
 // SweetAlert
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+// import Swal from "sweetalert2";
+// import withReactContent from "sweetalert2-react-content";
 // SweetAlert
-const MySwal = withReactContent(Swal);
+// const MySwal = withReactContent(Swal);
 // 2. 自定義一個 Toast (右上角小提示)
 // 這樣之後呼叫只要寫 Toast.fire(...) 即可，不用重複寫設定
-const Toast = MySwal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 1500,
-  timerProgressBar: true,
-  // didOpen: (toast) => {
-  //   toast.onmouseenter = Swal.stopTimer;
-  //   toast.onmouseleave = Swal.resumeTimer;
-  // },
-});
+// const Toast = MySwal.mixin({
+//   toast: true,
+//   position: "top-end",
+//   showConfirmButton: false,
+//   timer: 1500,
+//   timerProgressBar: true,
+// });
 
 const Cart = () => {
+  const { showError, showSuccess } = useMessage();
+  const dispatch = useDispatch();
+
   const [cart, setCart] = useState({});
 
   useEffect(() => {
@@ -53,12 +56,14 @@ const Cart = () => {
 
       const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       setCart(res2.data.data);
-      Toast.fire({
-        icon: "success",
-        title: "商品數量已成功更新",
-      });
+      showSuccess("數量更新成功！");
+      // Toast.fire({
+      //   icon: "success",
+      //   title: "商品數量已成功更新",
+      // });
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      dispatch(createAsyncMessage(error.response.data));
     }
   };
 
@@ -70,12 +75,14 @@ const Cart = () => {
       console.log(res);
       const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       setCart(res2.data.data);
-      Toast.fire({
-        icon: "success",
-        title: "商品刪除成功！",
-      });
+      showSuccess("商品刪除成功！");
+      // Toast.fire({
+      //   icon: "success",
+      //   title: "商品刪除成功！",
+      // });
     } catch (error) {
-      console.log(error.response);
+      // console.log(error.response);
+      showError(error.response.data);
     }
   };
 
@@ -85,6 +92,7 @@ const Cart = () => {
       console.log(res);
       const res2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`);
       setCart(res2.data.data);
+      showSuccess("刪品已全部刪除成功！");
     } catch (error) {
       console.log(error.response);
     }
